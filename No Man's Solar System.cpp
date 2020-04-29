@@ -55,6 +55,8 @@ namespace thatboy
 		GLfloat oribitAngle = 0;		// 公转角度
 		GLfloat faceAngle = 0;			// 自转角度
 		GLfloat oribitOffsetY = 0;		// Y方向轨道偏移
+		GLfloat orbitTiltX = 0;			// 轨道倾角
+		GLfloat orbitTiltZ = 0;			// 轨道倾角
 
 		bool showOrbit = true;			// 是否绘制轨道
 
@@ -62,7 +64,8 @@ namespace thatboy
 			, GLfloat oribitRadius, GLfloat oribitSpeed
 			, GLfloat faceSpeed, GLcolor planetcolor
 			, GLfloat oribitAngle, GLfloat faceAngle
-			, GLfloat oribitOffsetY = 0, bool showOrbit = true)
+			, GLfloat oribitOffsetY = 0, GLfloat orbitTiltX = 0, GLfloat orbitTiltZ = 0
+			, bool showOrbit = true)
 			: planetRadius(planetRadius)
 			, planeSlices(planeSlices)
 			, oribitRadius(oribitRadius)
@@ -72,6 +75,8 @@ namespace thatboy
 			, oribitAngle(oribitAngle)
 			, faceAngle(faceAngle)
 			, oribitOffsetY(oribitOffsetY)
+			, orbitTiltX(orbitTiltX)
+			, orbitTiltZ(orbitTiltZ)
 			, showOrbit(showOrbit)
 		{}
 
@@ -156,8 +161,8 @@ int main(int argc, char** argv)
 	using thatboy::SolarSystem::Sun;
 
 	// 添加行星
-	Sun = Planet(3, 30, 16, 8.f, -2, -1, 0XDD001B, 0, 0, 0, false);// 绕着屏幕中心转动
-	Sun["太阳核心"] = Planet(2.7, 200, 200, 0, -2, 5, 0XEEDB33, 0, 0, false);
+	Sun = Planet(3, 30, 16, 8.f, -2, -1, 0XDD001B, 0, 0, 0, 0, 0, false);// 绕着屏幕中心转动
+	Sun["太阳核心"] = Planet(2.7, 200, 200, 0, -2, 5, 0XEEDB33, 0, 0, 0, 0, false);
 	Sun["水星"] = Planet(0.6f, 10, 5, 06.0f, 10, rand() % 10 - 5, 0X7C7C7C, rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f);
 	Sun["金星"] = Planet(0.9f, 16, 10, 10.0f, 13, rand() % 40 - 20, 0XF4CC87, rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f);
 	Sun["地球"] = Planet(1.2f, 16, 10, 15.0f, 10, 10, 0X007ACC, rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f);
@@ -169,7 +174,7 @@ int main(int argc, char** argv)
 
 	// 回归速度很慢，设定一个慢速大轨道
 	// 冥王星用来演示多级卫星
-	Sun["曾经的冥王星"] = Planet(3.f, 16, 10, 70.f, -5, 10, 0XA88285, 180, 180, rand() % 2000 / 100.f - 10.f);
+	Sun["曾经的冥王星"] = Planet(3.f, 16, 10, 70.f, -5, 10, 0XA88285, 180, 180, rand() % 2000 / 100.f - 10.f,5);
 
 	// 添加二级行星（卫星）、三级卫星、四级卫星
 	Sun["金星"]["疑似存在的卫星"] = Planet(0.4, 16, 10, 2.0f, -10, rand() % 40 - 20, 0XF2BBA8, rand() % 360, rand() % 360);
@@ -181,7 +186,7 @@ int main(int argc, char** argv)
 	for (size_t i = 0; i < 400; i++)
 		Sun[std::string("小行星带") + std::to_string(i)]
 		= Planet(rand() % 10 / 30., 16, 10, rand() % 80 / 50. + 21.f, rand() % 20 / 3. + 6, rand() % 40 / 5. - 4
-			, thatboy::GRAY(rand() % 40 + 150), rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f, false);
+			, thatboy::GRAY(rand() % 40 + 150), rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f, rand() % 6 - 3, rand() % 6 - 3, false);
 	Sun["天王星"]["天卫一"] = Planet(0.9f, 16, 10, 6.f, -4.6, rand() % 40 - 20, 0XCC80AA, rand() % 360, rand() % 360);
 	Sun["天王星"]["天卫二"] = Planet(1.1f, 16, 10, 6.f, 2.2, rand() % 40 - 20, 0X88CAEE, rand() % 360, rand() % 360);
 	Sun["天王星"]["天卫一"]["天卫一.1"] = Planet(0.5f, 16, 10, 2.f, 2, rand() % 40 - 20, 0XBBF0AA, rand() % 360, rand() % 360);
@@ -225,7 +230,6 @@ int main(int argc, char** argv)
 
 void thatboy::SolarSystem::PlanetControl::onWindowDsiplay(void)
 {
-	//glClear(GL_COLOR_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();  //加载单位矩阵  
 	gluLookAt(38, 50, 38, 0.0, -20.0, 0.0, 0.0, 1.0, 0);
@@ -253,29 +257,26 @@ void thatboy::SolarSystem::PlanetControl::onWindowDsiplay(void)
 	std::function<void(const Planet&)> drawPlanet;
 	drawPlanet = [&drawPlanet, &drawCircle](const Planet& planet)
 	{
+		// 进行轨道倾斜
+		glRotatef(planet.orbitTiltX, 1, 0, 0);
+		glRotatef(planet.orbitTiltZ, 0, 0, 1);
+			glTranslatef(0, planet.oribitOffsetY, 0);
 		// 绘制轨道(基于父星坐标系）
 		if (ifShowOrbit && planet.showOrbit)
 		{
-			glTranslatef(0, planet.oribitOffsetY, 0);
 			glColor3f(PlaceRGBF(planet.planetcolor));
 			drawCircle(0, 0, planet.oribitRadius, ifOribitRotate ? planet.oribitAngle : 0);
-			glTranslatef(0, -planet.oribitOffsetY, 0);
 		}
-		// 公转
+
 		glRotatef(planet.oribitAngle, 0, 1, 0);
 		glTranslatef(planet.oribitRadius, 0, 0);
-		glRotatef(planet.oribitAngle, 0, -1, 0);		// 恢复角度
-
-		glTranslatef(0, planet.oribitOffsetY, 0);
+		glRotatef(planet.oribitAngle, 0, -1, 0);
 		for (auto& pMap : planet)
 			drawPlanet(pMap.second);
 		glTranslatef(0, -planet.oribitOffsetY, 0);
 
-		glRotatef(planet.oribitAngle, 0, 1, 0);		// 
-		// 自转
+		glRotatef(planet.oribitAngle, 0, 1, 0);
 		glRotatef(planet.faceAngle, 0, 1, 0);
-
-		// 轨道偏移
 		glTranslatef(0, planet.oribitOffsetY, 0);
 
 		glColor3f(PlaceRGBF(planet.planetcolor));
@@ -283,14 +284,14 @@ void thatboy::SolarSystem::PlanetControl::onWindowDsiplay(void)
 			glutWireCube(planet.planetRadius);
 		else
 			glutWireSphere(planet.planetRadius, planet.planeSlices, planet.planeStacks);
-		// 轨道偏移恢复
-		glTranslatef(0, -planet.oribitOffsetY, 0);
-		// 自转恢复
-		glRotatef(planet.faceAngle, 0, -1, 0);
 
-		// 公转恢复
+		glTranslatef(0, -planet.oribitOffsetY, 0);
+		glRotatef(planet.faceAngle, 0, -1, 0);
 		glTranslatef(-planet.oribitRadius, 0, 0);
-		glRotatef(planet.oribitAngle, 0, -1, 0);	// 恢复父环境
+		glRotatef(planet.oribitAngle, 0, -1, 0);
+
+		glRotatef(planet.orbitTiltZ, 0, 0, -1);
+		glRotatef(planet.orbitTiltX, -1, 0, 0);
 	};
 
 	// 递归绘制

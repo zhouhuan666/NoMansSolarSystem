@@ -157,44 +157,10 @@ int main(int argc, char** argv)
 
 	// 添加行星
 	Sun = Planet(3, 30, 16, 8.f, -2, -1, 0XDD001B, 0, 0, 0, false);// 绕着屏幕中心转动
-	Sun["太阳核心"] = Planet(2.7, 200, 200, 0, -2, 5, 0XEEDB33, 0, 0, false);
-	Sun["水星"] = Planet(0.6f, 10, 5, 06.0f, 10, rand() % 10 - 5, 0X7C7C7C, rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f);
-	Sun["金星"] = Planet(0.9f, 16, 10, 10.0f, 13, rand() % 40 - 20, 0XF4CC87, rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f);
 	Sun["地球"] = Planet(1.2f, 16, 10, 15.0f, 10, 10, 0X007ACC, rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f);
-	Sun["火星"] = Planet(1.0f, 16, 10, 19.0f, 15, rand() % 40 - 20, 0XC5A26A, rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f);
-	Sun["木星"] = Planet(1.5f, 16, 10, 25.0f, 22, rand() % 40 - 20, 0XD3D7C0, rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f);
-	Sun["土星"] = Planet(1.3f, 16, 10, 28.0f, 23, rand() % 40 - 20, 0XDFA14A, rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f);
-	Sun["天王星"] = Planet(2.0f, 16, 10, 32.0f, 30, rand() % 40 - 20, 0XA9CAFD, rand() % 360, rand() % 360, rand() % 400 / 100.f - 2.f);
-	Sun["海王星"] = Planet(3.0f, 16, 10, 40.0f, 15, rand() % 40 - 20, 0X4F82D5, rand() % 360, rand() % 360, rand() % 400 / 100.f - 2.f);
-
-	// 回归速度很慢，设定一个慢速大轨道
-	// 冥王星用来演示多级卫星
-	Sun["曾经的冥王星"] = Planet(3.f, 16, 10, 70.f, -5, 10, 0XA88285, 180, 180, rand() % 2000 / 100.f - 10.f);
 
 	// 添加二级行星（卫星）、三级卫星、四级卫星
-	Sun["金星"]["疑似存在的卫星"] = Planet(0.4, 16, 10, 2.0f, -10, rand() % 40 - 20, 0XF2BBA8, rand() % 360, rand() % 360);
 	Sun["地球"]["月球"] = Planet(0.8, 16, 10, 3.0f, -5, rand() % 40 - 20, 0XDFDFDF, rand() % 360, rand() % 360);
-	Sun["火星"]["火卫一"] = Planet(0.4f, 16, 10, 3.6f, 12, rand() % 40 - 20, 0X77AA55, rand() % 360, rand() % 360);
-	Sun["火星"]["火卫二"] = Planet(0.5f, 16, 10, 2.2f, -7, rand() % 40 - 20, 0XAA22CC, rand() % 360, rand() % 360);
-	Sun["木星"]["79颗卫星"] = Planet(0.7f, 16, 10, 3.2f, 5, rand() % 40 - 20, 0XCC8000, rand() % 360, rand() % 360);
-	// 添加小行星带，不显示轨道
-	for (size_t i = 0; i < 400; i++)
-		Sun[std::string("小行星带") + std::to_string(i)]
-		= Planet(rand() % 10 / 30., 16, 10, rand() % 80 / 50. + 21.f, rand() % 20 / 3. + 6, rand() % 40 / 5. - 4
-			, thatboy::GRAY(rand() % 40 + 150), rand() % 360, rand() % 360, rand() % 200 / 100.f - 1.f, false);
-	Sun["天王星"]["天卫一"] = Planet(0.9f, 16, 10, 6.f, -4.6, rand() % 40 - 20, 0XCC80AA, rand() % 360, rand() % 360);
-	Sun["天王星"]["天卫二"] = Planet(1.1f, 16, 10, 6.f, 2.2, rand() % 40 - 20, 0X88CAEE, rand() % 360, rand() % 360);
-	Sun["天王星"]["天卫一"]["天卫一.1"] = Planet(0.5f, 16, 10, 2.f, 2, rand() % 40 - 20, 0XBBF0AA, rand() % 360, rand() % 360);
-	Sun["天王星"]["天卫二"]["天卫二.1"] = Planet(0.6f, 16, 10, 3.f, -1.5, rand() % 40 - 20, 0XC485F8, rand() % 360, rand() % 360);
-	Sun["天王星"]["天卫二"]["天卫二.1"]["天卫二.1.1"] = Planet(0.3f, 16, 10, 1.1f, -3.6, rand() % 40 - 20, 0XF86A5B, rand() % 360, rand() % 360);
-	Sun["海王星"]["海卫一"] = Planet(1.f, 16, 10, 6.f, 4, rand() % 40 - 20, 0XC5A26A, rand() % 360, rand() % 360);
-	Sun["海王星"]["海卫一"]["海卫一.1"] = Planet(0.5f, 16, 10, 2.f, 3, rand() % 40 - 20, 0X7C7C7C, rand() % 360, rand() % 360);
-
-	// 设定多级卫星
-	Sun["曾经的冥王星"]["冥卫一"] = Planet(2.f, 16, 10, 10.f, -10, rand() % 40 - 20, 0X45828A, rand() % 360, rand() % 360);
-	Sun["曾经的冥王星"]["冥卫一"]["二级卫星"] = Planet(1.f, 16, 10, 5.f, -9, rand() % 40 - 20, 0X85A23A, rand() % 360, rand() % 360);
-	Sun["曾经的冥王星"]["冥卫一"]["二级卫星"]["三级卫星"] = Planet(0.5f, 16, 10, 2.f, 9, rand() % 40 - 20, 0XF2BBA8, rand() % 360, rand() % 360);
-	Sun["曾经的冥王星"]["冥卫一"]["二级卫星"]["三级卫星"]["四级卫星"] = Planet(0.4f, 16, 10, 1.f, 5, rand() % 40 - 20, 0XCC80AA, rand() % 360, rand() % 360);
 
 	// 初始化OpenGL
 	glutInit(&argc, argv);

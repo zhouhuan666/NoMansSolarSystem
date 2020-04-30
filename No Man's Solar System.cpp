@@ -202,19 +202,33 @@ int main(int argc, char** argv)
 	Sun["曾经的冥王星"]["冥卫一"]["二级卫星"]["三级卫星"]["四级卫星"] = Planet(0.4f, 16, 10, 1.f, 5, rand() % 40 - 20, 0XCC80AA, rand() % 360, rand() % 360);
 
 	// 初始化OpenGL
+	GLfloat mat_specular[] = { 0.5, 0.5, 0.5, 0.5 };
+	GLfloat mat_shininess[] = { 50.0 };
+	GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
+	GLfloat light_ambient[] = { 1.0, 1.0, 1.0, 0.0 };
+	GLfloat white_light[] = { 0.5, 0.5, 0.5, 0.5 };
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize(1920, 1080);
-	glutInitWindowPosition(0, 0);
+	glutInitWindowSize(thatboy::SolarSystem::PlanetControl::screenWidth, thatboy::SolarSystem::PlanetControl::screenHeight);
 	glutCreateWindow(R"(NO MAN'S SKY)");
-	glutFullScreen();
+
 	glShadeModel(GL_SMOOTH);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBlendFunc(GL_SRC_COLOR, GL_ZERO);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
+	glColorMaterial(GL_FRONT, GL_DIFFUSE);
+	glHint(GL_LINE_SMOOTH, GL_NICEST);
+
+	glEnable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glEnable(GL_LINE_SMOOTH);
-	glHint(GL_LINE_SMOOTH, GL_NICEST);
-	glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_LIGHT0);
 
 	glutDisplayFunc(thatboy::SolarSystem::PlanetControl::onWindowDsiplay);
 	glutReshapeFunc(thatboy::SolarSystem::PlanetControl::onWindowReshape);
@@ -222,7 +236,8 @@ int main(int argc, char** argv)
 	glutTimerFunc(20, thatboy::SolarSystem::PlanetControl::onTimerFlushWindow, Planet::IDT_FLUSHWINDOW);
 	glutMouseFunc(thatboy::SolarSystem::PlanetControl::onMouseMsg);
 	glutMotionFunc(thatboy::SolarSystem::PlanetControl::onMotion);
-
+	
+	glutFullScreen();
 	// 交予控制权
 	glutMainLoop();
 	return 0;
@@ -233,11 +248,6 @@ void thatboy::SolarSystem::PlanetControl::onWindowDsiplay(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();  //加载单位矩阵  
 	gluLookAt(38, 50, 38, 0.0, -20.0, 0.0, 0.0, 1.0, 0);
-	glRotatef(rotationAngle, 0.0f, 1.0f, 0.0f);
-	glRotatef(xAngle, 1.0, 0.0, 0.0);
-	glRotatef(yAngle, 0.0, 1.0, 0.0);
-	glRotatef(zAngle, 0.0, 0.0, 1.0);
-
 	auto drawCircle = [](int x, int y, int r, float startAngle = 0)
 	{
 		int n = 180;
@@ -281,9 +291,9 @@ void thatboy::SolarSystem::PlanetControl::onWindowDsiplay(void)
 
 		glColor3f(PlaceRGBF(planet.planetcolor));
 		if (ifShowCube)
-			glutWireCube(planet.planetRadius);
+			glutSolidCube(planet.planetRadius);
 		else
-			glutWireSphere(planet.planetRadius, planet.planeSlices, planet.planeStacks);
+			glutSolidSphere(planet.planetRadius, planet.planeSlices, planet.planeStacks);
 
 		glTranslatef(0, -planet.oribitOffsetY, 0);
 		glRotatef(planet.faceAngle, 0, -1, 0);
@@ -296,6 +306,12 @@ void thatboy::SolarSystem::PlanetControl::onWindowDsiplay(void)
 
 	// 递归绘制
 	glPushMatrix();
+
+	glRotatef(rotationAngle, 0.0f, 1.0f, 0.0f);
+	glRotatef(xAngle, 1.0, 0.0, 0.0);
+	glRotatef(yAngle, 0.0, 1.0, 0.0);
+	glRotatef(zAngle, 0.0, 0.0, 1.0);
+
 	drawPlanet(Sun);
 	glPopMatrix();
 
